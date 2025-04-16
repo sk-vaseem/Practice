@@ -1,9 +1,9 @@
 class Node {
-    int data; // Data part of the node
-    Node next; // Reference to the next node
+    int key;
+    Node left, right;
 
-    Node(int data) {
-        this.data = data;
-        this.next = null;
+    public Node(int item) {
+        key = item;
+        left = right = null;
     }
 }
