@@ -1,0 +1,158 @@
+App.component.html
+
+ <router-outlet></router-outlet>  
+***********
+
+Home.component.html
+
+
+
+<nav class="navbar navbar-expand-sm bg-primary navbar-dark">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a  routerLink="employees" routerLinkActive="active" class="nav-link">
+          Employees</a>
+      </li>
+      <li class="nav-item">
+            <a  routerLink="employeeList" routerLinkActive="active"
+             class="nav-link">Manage Employee</a>
+      </li>   
+          
+                
+    </ul>
+</nav>
+  <div class="container">
+    <router-outlet></router-outlet>
+    </div>  
+
+******************
+App Routing Module
+
+const routes: Routes = [
+  {path:'',redirectTo:'employees',pathMatch:"full"},
+  {path:'home',component:HomeComponent,children:
+    [
+  {path:'employees',component:EmployeeComponent},
+  
+  {path:'update-employee/:id',component:UpdateEmployeeComponent},
+  
+] },
+     
+      
+   *****************
+
+
+import { Component, OnInit } from '@angular/core';
+import { Employee } from '../employee';
+import { EmployeeService } from '../employee.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-employee-list',
+  templateUrl: './employee-list.component.html',
+  styleUrls: ['./employee-list.component.css']
+})
+export class EmployeeListComponent implements OnInit {
+
+  employees: Employee[] = [];
+  term!: string;
+  constructor(private employeeService:EmployeeService,private router:Router) {
+  }
+ 
+  ngOnInit(): void {
+  
+    // this.getEmployee();
+    this.employeeService.getEmployees().subscribe(data=>
+      {
+       console.log(data);
+       this.employees=data;
+        });
+}
+
+
+ 
+
+    updateEmployee(id:number)
+   {
+
+this.router.navigate(['/home/update-employee',id])
+
+   }
+  
+   deleteEmployee(id:number)
+   {
+
+    this.router.navigate(['/home/delete-employee',id])
+   }
+
+}
+
+
+*****************
+
+EmployeeService
+
+import { Injectable } from '@angular/core';
+//import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Employee } from './employee';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
+
+  private baseUrl="http://localhost:8080";
+
+  constructor(private http: HttpClient) { }
+
+ public  getEmployees():Observable<Employee[]>
+  {
+    return this.http.get<Employee[]>(`${this.baseUrl}/employees`);
+  }
+
+
+  getEmployeeById(id:number):Observable<Employee>
+  {
+ console.log("id in service "+id)
+  return this.http.get<Employee>(`${this.baseUrl}/employee/${id}`)
+   
+  }
+
+
+  updateEmployee(id:number,employee:Employee):Observable<Employee>
+  {
+ 
+   return this.http.put<Employee>(`${this.baseUrl}/employee/${id}`,employee)
+  }
+ 
+}
+
+******************
+app-routing-module.ts
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { EmployeeComponent } from './employee/employee.component';
+import { EmployeeListComponent } from './employee-list/employee-list.component';
+import { UpdateEmployeeComponent } from './update-employee/update-employee.component';
+import { HomeComponent } from './home/home.component';
+
+const routes: Routes = [
+  // {path:'',redirectTo:'employees',pathMatch:"full"},
+  {path:'home',component:HomeComponent,children:
+    [
+  {path:'employees',component:EmployeeComponent},
+  {path:'employeeList',component:EmployeeListComponent},
+  {path:'update-employee/:id',component:UpdateEmployeeComponent},
+] },
+
+ 
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
